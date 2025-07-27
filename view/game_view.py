@@ -12,7 +12,7 @@ from model.pieces import Piece
 class GameView:
     def __init__(self, board: Board):
         self.term: Terminal = Terminal()
-        self.selection_cursor: Cursor = Cursor(self.term.on_teal, board.width, board.height) # choosing a piece
+        self.selection_cursor: Cursor = Cursor(self.term.on_teal, board.width, board.height, square=(4, 6)) # choosing a piece
         self.movement_cursor: Cursor = Cursor(self.term.on_aqua, board.width, board.height) # moving a piece
         self.board: Board = board
         self.state = SelectingState(self)
