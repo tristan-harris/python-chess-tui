@@ -39,7 +39,7 @@ class Pawn(Piece):
         super().__init__(white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
-        direction = 1 if self.white else -1
+        direction = -1 if self.white else 1
         moveable_squares: set[tuple[int, int]] = set()
 
         # move forward by one square
