@@ -7,7 +7,6 @@ from util import log
 
 from .cursor import Cursor
 from model.board import Board
-from model.pieces import Piece
 
 class GameView:
     def __init__(self, board: Board):
@@ -45,15 +44,15 @@ class GameView:
             cursor = (new_x, new_y)
             self.draw_board()
 
-    def draw_board(self, moveable_squares: set[tuple[int, int]] = set()):
+    def draw_board(self, draw_cursors: bool = True, moveable_squares: set[tuple[int, int]] = set()):
         print(self.term.home + self.term.clear)  # clear screen
 
         for y in range(self.board.height):
             for x in range(self.board.width):
 
-                if self.movement_cursor.square == (x, y) and isinstance(self.state, MovingState):
+                if draw_cursors and self.movement_cursor.square == (x, y) and isinstance(self.state, MovingState):
                     background_color = self.movement_cursor.color
-                elif self.selection_cursor.square == (x, y):
+                elif draw_cursors and self.selection_cursor.square == (x, y):
                     if isinstance(self.state, MovingState):
                         background_color = self.selection_cursor.color
                     else:
@@ -66,7 +65,7 @@ class GameView:
                     background_color = self.term.on_gray40
 
                 if (x, y) in self.board.get_pieces():
-                    if self.board.get_pieces()[(x, y)].white:
+                    if self.board.get_pieces()[(x, y)].is_white:
                         foreground_color = self.term.gray100
                     else:
                         foreground_color = self.term.gray0
@@ -80,18 +79,35 @@ class GameView:
 
             print() # next row
 
-        print("text")
+        print(self.get_board_status(self.board))
+
+    def get_board_status(self, board: Board) -> str:
+        if board.game_over:
+            if board.white_turn:
+                return "White has been checkmated. Black wins!"
+            else:
+                return "Black has been checkmated. White wins!"
+        else:
+            if board.white_turn:
+                return "White to play"
+            else:
+                return "Black to play"
 
     def select_square(self, square: tuple[int, int]):
         if square in self.board.get_pieces():
-            self.change_state(MovingState(self, self.board.get_moveable_squares(square)))
+            if self.board.get_pieces()[square].is_white == self.board.white_turn:
+                self.change_state(MovingState(self, self.board.get_moveable_squares(square)))
 
     def move_piece(self, piece_square: tuple[int, int], target_square: tuple[int, int], moveable_squares: set[tuple[int, int]]):
         if piece_square in self.board.get_pieces():
             if self.movement_cursor.square in moveable_squares:
-                self.board.move_piece(piece_square, target_square)
-                self.selection_cursor.square = target_square
-                self.change_state(SelectingState(self))
+                self.board = self.board.move_piece(piece_square, target_square)
+
+                if self.board.is_king_in_checkmate(self.board.white_turn):
+                    self.change_state(NoInputState(self))
+                else:
+                    self.selection_cursor.square = target_square
+                    self.change_state(SelectingState(self))
 
 
 class GameViewState:
@@ -200,4 +216,5 @@ class MovingState(GameViewState):
 
 
 class NoInputState(GameViewState):
-    pass
+    def enter(self):
+        self.view.draw_board(draw_cursors = False)

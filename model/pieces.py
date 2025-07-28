@@ -10,13 +10,13 @@ class Piece:
     board_width = 8
     board_height = 8
 
-    def __init__(self, white: bool):
-        self.white = white
+    def __init__(self, is_white: bool):
+        self.is_white = is_white
         self.name = "Piece"
         self.has_moved = False
 
     def __str__(self) -> str:
-        return f"{self.name} (white={self.white}, moved={self.has_moved})"
+        return f"{self.name} (white={self.is_white}, moved={self.has_moved})"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         raise NotImplementedError("This should be overridden by subclasses.")
@@ -35,11 +35,11 @@ class Pawn(Piece):
     character = "P"
     nf_character = "󰡙"
 
-    def __init__(self, white: bool):
-        super().__init__(white)
+    def __init__(self, is_white: bool):
+        super().__init__(is_white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
-        direction = -1 if self.white else 1
+        direction = -1 if self.is_white else 1
         moveable_squares: set[tuple[int, int]] = set()
 
         # move forward by one square
@@ -58,7 +58,7 @@ class Pawn(Piece):
         # capture diagonally
         for modifier in [(-1, direction), (1, direction)]:
             new_square = (square[0] + modifier[0], square[1] + modifier[1])
-            if new_square in pieces and pieces[new_square].white != self.white:
+            if new_square in pieces and pieces[new_square].is_white != self.is_white:
                 moveable_squares.add(new_square)
 
         return moveable_squares
@@ -69,8 +69,8 @@ class Knight(Piece):
     character = "N"
     nf_character = "󰡘"
 
-    def __init__(self, white: bool):
-        super().__init__(white)
+    def __init__(self, is_white: bool):
+        super().__init__(is_white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -81,7 +81,7 @@ class Knight(Piece):
             if self._in_bounds(new_square):
                 if new_square not in pieces:
                     moveable_squares.add(new_square)
-                elif pieces[new_square].white != self.white:
+                elif pieces[new_square].is_white != self.is_white:
                     moveable_squares.add(new_square)
 
         return moveable_squares
@@ -92,8 +92,8 @@ class Bishop(Piece):
     character = "B"
     nf_character = "󰡜"
 
-    def __init__(self, white: bool):
-        super().__init__(white)
+    def __init__(self, is_white: bool):
+        super().__init__(is_white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -108,7 +108,7 @@ class Bishop(Piece):
                         moveable_squares.add(new_square)
                         increment += 1
                     else:
-                        if pieces[new_square].white != self.white:
+                        if pieces[new_square].is_white != self.is_white:
                             moveable_squares.add(new_square)
                         break
                 else:
@@ -122,8 +122,8 @@ class Rook(Piece):
     character = "R"
     nf_character = "󰡛"
 
-    def __init__(self, white: bool):
-        super().__init__(white)
+    def __init__(self, is_white: bool):
+        super().__init__(is_white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -138,7 +138,7 @@ class Rook(Piece):
                         moveable_squares.add(new_square)
                         increment += 1
                     else:
-                        if pieces[new_square].white != self.white:
+                        if pieces[new_square].is_white != self.is_white:
                             moveable_squares.add(new_square)
                         break
                 else:
@@ -152,13 +152,13 @@ class Queen(Piece):
     character = "Q"
     nf_character = "󰡚"
 
-    def __init__(self, white: bool):
-        super().__init__(white)
+    def __init__(self, is_white: bool):
+        super().__init__(is_white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
-        moveable_squares = moveable_squares.union(Bishop.get_moveable_squares(Bishop(self.white), pieces, square))
-        moveable_squares = moveable_squares.union(Rook.get_moveable_squares(Rook(self.white), pieces, square))
+        moveable_squares = moveable_squares.union(Bishop.get_moveable_squares(Bishop(self.is_white), pieces, square))
+        moveable_squares = moveable_squares.union(Rook.get_moveable_squares(Rook(self.is_white), pieces, square))
         return moveable_squares
 
 class King(Piece):
@@ -166,8 +166,8 @@ class King(Piece):
     character = "K"
     nf_character = "󰡗"
 
-    def __init__(self, white: bool):
-        super().__init__(white)
+    def __init__(self, is_white: bool):
+        super().__init__(is_white)
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -178,7 +178,7 @@ class King(Piece):
             if self._in_bounds(new_square):
                 if new_square not in pieces:
                     moveable_squares.add(new_square)
-                elif pieces[new_square].white != self.white:
+                elif pieces[new_square].is_white != self.is_white:
                     moveable_squares.add(new_square)
 
         return moveable_squares
