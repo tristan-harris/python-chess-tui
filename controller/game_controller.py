@@ -21,7 +21,10 @@ class GameController:
 
         self.board: Board = Board()
         self.board.setup_pieces()
-        self.view: GameView = GameView(self.board.deep_clone(), self.handle_movement, self.config)
+
+        self.view: GameView = GameView(self.board.deep_clone(), self.handle_human_movement, self.config)
+
+        self.movements_queue: list[Movement] = []
 
     def start(self):
         asyncio.run(self.run_tasks())
@@ -37,57 +40,62 @@ class GameController:
             await self.black_engine.start()
             tasks.append(asyncio.create_task(self.black_engine.idle()))
 
-        tasks.append(asyncio.create_task(self.setup_first_move()))
+        tasks.append(asyncio.create_task(self.process_movements()))
 
         await self.view.run()
 
-    async def setup_first_move(self):
-        # needed so that the view can draw the initial state of the board
-        # before the movement made by an engine as white
-        while not self.view.is_ready:
-            await asyncio.sleep(0.1)
+    async def process_movements(self):
+        try:
+            # needed so that the view can draw the initial state of the board
+            # before the movement made by an engine as white
+            while not self.view.is_ready:
+                await asyncio.sleep(0.1)
 
-        if self.white_engine:
-            movement: Movement = await self.get_engine_movement(self.white_engine)
-            await self.handle_movement(movement)
-        else:
-            await self.view.enable_input()
+            # setup first move
+            if self.white_engine:
+                self.movements_queue.append(await self.get_engine_movement(self.white_engine))
+            else:
+                await self.view.enable_input()
+
+            while True:
+                if len(self.movements_queue) == 0:
+                    await asyncio.sleep(0.01)
+                    continue
+
+                movement: Movement = self.movements_queue.pop(0)
+                self.board = self.board.move_piece(movement)
+
+                # fifty-move rule
+                if self.board.halfmove_clock > 100:
+                    self.board.game_over = True
+                elif self.board.is_king_in_checkmate(self.board.white_turn):
+                    self.board.game_over = True
+
+                await self.view.set_board(self.board.deep_clone())
+
+                if self.board.game_over:
+                    await self.view.disable_input()
+                    break
+
+                engine: UCIEngine | None = None
+
+                if self.board.white_turn and self.white_engine:
+                    engine = self.white_engine
+                elif not self.board.white_turn and self.black_engine:
+                    engine = self.black_engine
+
+                if engine:
+                    await self.view.disable_input()
+                    self.movements_queue.append(await self.get_engine_movement(engine))
+                else:
+                    await self.view.enable_input()
+
+        except asyncio.CancelledError:
+            raise
 
     async def get_engine_movement(self, engine: UCIEngine) -> Movement:
         movement_text: str = await engine.get_move(self.board.fen_serialize())
         return Movement.create_from_algebraic(movement_text)
 
-    async def handle_movement(self, movement: Movement):
-        try:
-            self.board = self.board.move_piece(movement)
-
-            # fifty-move rule
-            if self.board.halfmove_clock > 100:
-                self.board.game_over = True
-            if self.board.is_king_in_checkmate(self.board.white_turn):
-                self.board.game_over = True
-
-            await self.view.set_board(self.board.deep_clone())
-
-            if self.board.game_over:
-                await self.view.disable_input()
-                return
-
-            engine: UCIEngine | None = None
-
-            if self.board.white_turn:
-                if self.white_engine:
-                    engine = self.white_engine
-            else:
-                if self.black_engine:
-                    engine = self.black_engine
-
-            if engine:
-                await self.view.disable_input()
-                next_movement: Movement = await self.get_engine_movement(engine)
-                await self.handle_movement(next_movement)
-            else:
-                await self.view.enable_input()
-
-        except asyncio.CancelledError:
-            raise
+    async def handle_human_movement(self, movement: Movement):
+        self.movements_queue.append(movement)
