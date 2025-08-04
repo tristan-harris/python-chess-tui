@@ -1,25 +1,25 @@
 from __future__ import annotations # lazy loads type annotations
 
-from util import log
-
 class Piece:
     name = "Piece"
-    character = " "
-    nf_character = " "
+    nerdfont_character = " "
+    _character = " "
 
     board_width = 8
     board_height = 8
 
     def __init__(self, is_white: bool):
         self.is_white = is_white
-        self.name = "Piece"
         self.has_moved = False
 
     def __str__(self) -> str:
         return f"{self.name} (white={self.is_white}, moved={self.has_moved})"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
-        raise NotImplementedError("This should be overridden by subclasses.")
+        raise NotImplementedError("Cannot get moveable squares from abstract Piece class.")
+
+    def get_ascii_character(self) -> str:
+        return self._character.upper() if self.is_white else self._character
 
     def _in_bounds(self, square: tuple[int, int]) -> bool:
         if square[0] < 0 or square[0] >= self.board_width:
@@ -32,14 +32,11 @@ class Piece:
 
 class Pawn(Piece):
     name = "Pawn"
-    character = "P"
-    nf_character = "󰡙"
-
-    def __init__(self, is_white: bool):
-        super().__init__(is_white)
+    nerdfont_character = "󰡙"
+    _character = "p"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
-        direction = -1 if self.is_white else 1
+        direction: int = -1 if self.is_white else 1
         moveable_squares: set[tuple[int, int]] = set()
 
         # move forward by one square
@@ -66,11 +63,8 @@ class Pawn(Piece):
 
 class Knight(Piece):
     name = "Knight"
-    character = "N"
-    nf_character = "󰡘"
-
-    def __init__(self, is_white: bool):
-        super().__init__(is_white)
+    nerdfont_character = "󰡘"
+    _character = "n"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -89,11 +83,8 @@ class Knight(Piece):
 
 class Bishop(Piece):
     name = "Bishop"
-    character = "B"
-    nf_character = "󰡜"
-
-    def __init__(self, is_white: bool):
-        super().__init__(is_white)
+    nerdfont_character = "󰡜"
+    _character = "b"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -119,11 +110,8 @@ class Bishop(Piece):
 
 class Rook(Piece):
     name = "Rook"
-    character = "R"
-    nf_character = "󰡛"
-
-    def __init__(self, is_white: bool):
-        super().__init__(is_white)
+    nerdfont_character = "󰡛"
+    _character = "r"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -149,11 +137,8 @@ class Rook(Piece):
 
 class Queen(Piece):
     name = "Queen"
-    character = "Q"
-    nf_character = "󰡚"
-
-    def __init__(self, is_white: bool):
-        super().__init__(is_white)
+    nerdfont_character = "󰡚"
+    _character = "q"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
@@ -163,11 +148,8 @@ class Queen(Piece):
 
 class King(Piece):
     name = "King"
-    character = "K"
-    nf_character = "󰡗"
-
-    def __init__(self, is_white: bool):
-        super().__init__(is_white)
+    nerdfont_character = "󰡗"
+    _character = "k"
 
     def get_moveable_squares(self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]) -> set[tuple[int, int]]:
         moveable_squares: set[tuple[int, int]] = set()
