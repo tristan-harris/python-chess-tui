@@ -190,9 +190,10 @@ class GameView:
                 await self.send_movement(movement)
 
     async def _change_state(self, new_state: GameViewState):
-        await self.state.exit()
-        self.state = new_state
-        await self.state.enter()
+        if self.state.__class__ != new_state.__class__:
+            await self.state.exit()
+            self.state = new_state
+            await self.state.enter()
 
 
 class GameViewState:
