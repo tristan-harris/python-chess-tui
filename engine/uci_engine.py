@@ -33,18 +33,18 @@ class UCIEngine:
         except FileNotFoundError:
             raise UCIEngineStartupError(f"Engine not found at '{self.path}'")
         except PermissionError:
-            raise UCIEngineStartupError(f"Permission denied for executing engine ('{self.path}')")
+            raise UCIEngineStartupError(f"Permission denied for executing engine '{self.path}'")
         except asyncio.TimeoutError:
-            raise UCIEngineStartupError(f"Subprocess for engine ('{self.path}') timed-out")
+            raise UCIEngineStartupError(f"Subprocess for engine '{self.path}' timed-out")
         except OSError:
-            raise UCIEngineStartupError(f"Unexpected OS error starting engine ('{self.path}')")
+            raise UCIEngineStartupError(f"Unexpected OS error starting engine '{self.path}'")
         except Exception:
-            raise UCIEngineStartupError(f"Unexpected error starting engine ('{self.path}')")
+            raise UCIEngineStartupError(f"Unexpected error starting engine '{self.path}'")
 
         if self.process.stdin is None:
-            raise UCIEngineStartupError(f"Could not create stdin pipe for engine ('{self.path}')")
+            raise UCIEngineStartupError(f"Could not create stdin pipe for engine '{self.path}'")
         if self.process.stdout is None:
-            raise UCIEngineStartupError(f"Could not create stdout pipe for engine ('{self.path}')")
+            raise UCIEngineStartupError(f"Could not create stdout pipe for engine '{self.path}'")
 
         self.stdin: asyncio.StreamWriter = self.process.stdin
         self.stdout: asyncio.StreamReader = self.process.stdout
@@ -59,7 +59,7 @@ class UCIEngine:
             await asyncio.wait_for(self.write("isready"), timeout=timeout)
             await asyncio.wait_for(self.wait_for("readyok"), timeout=timeout)
         except asyncio.TimeoutError:
-            raise UCIEngineTimeoutError(f"Engine ('{self.path}') did not respond to UCI initialisation")
+            raise UCIEngineTimeoutError(f"Engine '{self.path}' did not respond to UCI initialisation")
 
     async def idle(self):
         try:
