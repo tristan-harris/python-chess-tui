@@ -16,7 +16,7 @@ def main(white: str | None, black: str | None, depth: int, ascii: bool):
 
     Use arrow keys to move cursor, press 'Space' to confirm, 'Esc' to cancel and 'q' to quit.
 
-    Engine(s) used must be UCI compliant. If engines are not specified, player input will be used."""
+    Engines used must be UCI compliant. If engines are not specified, player input will be used."""
     config: GameConfig = GameConfig(white, black, depth, ascii)
     controller: GameController = GameController(config)
 
