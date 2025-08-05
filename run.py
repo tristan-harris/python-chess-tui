@@ -19,12 +19,13 @@ def main(white: str | None, black: str | None, depth: int, ascii: bool):
     Engine(s) used must be UCI compliant. If engines are not specified, player input will be used."""
     config: GameConfig = GameConfig(white, black, depth, ascii)
     controller: GameController = GameController(config)
-    controller.start()
 
-
-if __name__ == "__main__":
     try:
-        main()
+        controller.start()
     except Exception as error:
         print(f"ERROR: {error}")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
