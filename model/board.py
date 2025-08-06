@@ -134,7 +134,7 @@ class Board:
         # check if not castling through or into check
         for column in range(
             min(king_square[0] + 1, target_king_square[0]),
-            max(king_square[0] - 1, target_king_square[0] + 1),
+            max(king_square[0], target_king_square[0] + 1),
         ):
             movement: Movement = Movement(king_square, (column, king_square[1]))
             new_board: Board = self.move_piece(movement)
