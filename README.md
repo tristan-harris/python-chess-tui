@@ -6,7 +6,7 @@
 
 A Python program that lets you play chess in the terminal, with support for UCI-compliant chess engines.
 
-Requires [Blessed](https://github.com/jquast/blessed) for the TUI (since curses is archaic), and [click](https://github.com/pallets/click) for the command-line interface.
+Requires [Blessed](https://github.com/jquast/blessed) for the TUI (since curses is archaic), and [Click](https://github.com/pallets/click) for the command-line interface.
 
 ---
 
