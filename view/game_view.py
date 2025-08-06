@@ -12,6 +12,7 @@ from model.board import Board
 from model.movement import Movement
 from model.pieces import Piece
 
+PADDING: int = 2
 
 class GameView:
     def __init__(self, board: Board, send_movement: Callable[[Movement]], game_config: GameConfig):
@@ -77,6 +78,7 @@ class GameView:
         pieces: dict[tuple[int, int], Piece] = self.board.get_pieces()
 
         for y in range(self.board.height):
+            print(" " * PADDING, end="")
             for x in range(self.board.width):
                 background_color: str = ""
 
