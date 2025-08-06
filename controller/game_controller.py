@@ -1,5 +1,6 @@
 import asyncio
 
+from .exceptions import EndGameException
 from .game_config import GameConfig
 from engine.uci_engine import UCIEngine
 from model.board import Board
@@ -22,7 +23,9 @@ class GameController:
         self.board: Board = Board()
         self.board.setup_pieces()
 
-        self.view: GameView = GameView(self.board.deep_clone(), self.handle_human_movement, self.config)
+        self.view: GameView = GameView(
+            self.board.deep_clone(), self.handle_human_movement, self.config
+        )
 
         self.movements_queue: list[Movement] = []
 
@@ -30,19 +33,22 @@ class GameController:
         asyncio.run(self.run_tasks())
 
     async def run_tasks(self):
-        tasks: list[asyncio.Task] = []
+        try:
+            async with asyncio.TaskGroup() as group:
+                if self.white_engine:
+                    await self.white_engine.start()
+                    group.create_task(self.white_engine.idle())
+                if self.black_engine:
+                    await self.black_engine.start()
+                    group.create_task(self.black_engine.idle())
+                group.create_task(self.process_movements())
+                group.create_task(self.view.run())
 
-        if self.white_engine:
-            await self.white_engine.start()
-            tasks.append(asyncio.create_task(self.white_engine.idle()))
-
-        if self.black_engine:
-            await self.black_engine.start()
-            tasks.append(asyncio.create_task(self.black_engine.idle()))
-
-        tasks.append(asyncio.create_task(self.process_movements()))
-
-        await self.view.run()
+        except* EndGameException:  # raised by view upon user quitting
+            pass
+        except* Exception as errors:
+            for error in errors.exceptions:
+                raise error
 
     async def process_movements(self):
         try:

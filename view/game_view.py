@@ -6,6 +6,7 @@ from blessed import Terminal
 from blessed.keyboard import Keystroke
 
 from .cursor import Cursor
+from controller.exceptions import EndGameException
 from controller.game_config import GameConfig
 from model.board import Board
 from model.movement import Movement
@@ -60,7 +61,7 @@ class GameView:
                     user_input: Keystroke = self.term.inkey(timeout=0.01)
                     if user_input == "q":
                         print(self.term.home + self.term.clear)
-                        return
+                        raise EndGameException()
                     else:
                         await self.state.handle_input(user_input)
 

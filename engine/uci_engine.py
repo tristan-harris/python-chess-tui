@@ -5,15 +5,6 @@ from pathlib import Path
 class UCIEngineError(Exception):
     pass
 
-
-class UCIEngineStartupError(UCIEngineError):
-    pass
-
-
-class UCIEngineTimeoutError(UCIEngineError):
-    pass
-
-
 class UCIEngine:
     def __init__(self, path: str, depth: int):
         self.path: Path = Path(path)
@@ -31,20 +22,20 @@ class UCIEngine:
                 timeout=5,
             )
         except FileNotFoundError:
-            raise UCIEngineStartupError(f"Engine not found at '{self.path}'")
+            raise UCIEngineError(f"Engine not found at '{self.path}'")
         except PermissionError:
-            raise UCIEngineStartupError(f"Permission denied for executing engine '{self.path}'")
+            raise UCIEngineError(f"Permission denied for executing engine '{self.path}'")
         except asyncio.TimeoutError:
-            raise UCIEngineStartupError(f"Subprocess for engine '{self.path}' timed-out")
+            raise UCIEngineError(f"Subprocess for engine '{self.path}' timed-out")
         except OSError:
-            raise UCIEngineStartupError(f"Unexpected OS error starting engine '{self.path}'")
+            raise UCIEngineError(f"Unexpected OS error starting engine '{self.path}'")
         except Exception:
-            raise UCIEngineStartupError(f"Unexpected error starting engine '{self.path}'")
+            raise UCIEngineError(f"Unexpected error starting engine '{self.path}'")
 
         if self.process.stdin is None:
-            raise UCIEngineStartupError(f"Could not create stdin pipe for engine '{self.path}'")
+            raise UCIEngineError(f"Could not create stdin pipe for engine '{self.path}'")
         if self.process.stdout is None:
-            raise UCIEngineStartupError(f"Could not create stdout pipe for engine '{self.path}'")
+            raise UCIEngineError(f"Could not create stdout pipe for engine '{self.path}'")
 
         self.stdin: asyncio.StreamWriter = self.process.stdin
         self.stdout: asyncio.StreamReader = self.process.stdout
@@ -59,14 +50,15 @@ class UCIEngine:
             await asyncio.wait_for(self.write("isready"), timeout=timeout)
             await asyncio.wait_for(self.wait_for("readyok"), timeout=timeout)
         except asyncio.TimeoutError:
-            raise UCIEngineTimeoutError(f"Engine '{self.path}' did not respond to UCI initialisation")
+            await self.terminate()
+            raise UCIEngineError(f"Engine '{self.path}' did not respond to UCI initialisation")
 
     async def idle(self):
         try:
             while True:
                 await asyncio.sleep(100_000)
         except asyncio.CancelledError:
-            await self.quit()
+            await self.terminate()
             raise
 
     async def write(self, command: str):
@@ -90,9 +82,11 @@ class UCIEngine:
         move: str = output.split(" ")[1]
         return move
 
-    async def quit(self):
-        try:
-            await self.write("quit")
-            await self.process.wait()
-        except Exception:
-            self.process.kill()
+    async def terminate(self):
+        if self.process:
+            try:
+                await self.write("quit")
+                await asyncio.wait_for(self.process.wait(), timeout=5)
+            except (asyncio.TimeoutError, OSError):
+                self.process.kill()
+                await self.process.wait()
