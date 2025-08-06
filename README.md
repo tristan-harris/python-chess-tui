@@ -1,4 +1,4 @@
-# Python Chess TUI Program
+# Python Chess TUI
 
 ### Overview
 
@@ -33,4 +33,4 @@ Options:
 
 ### Other
 
-Developed on Linux and tested with chess engines [stockfish](https://github.com/official-stockfish/Stockfish), [berserk](https://github.com/jhonnold/berserk) and [Bit-Genie](https://github.com/Aryan1508/Bit-Genie).
+Developed on Linux and tested with chess engines [Stockfish](https://github.com/official-stockfish/Stockfish), [Berserk](https://github.com/jhonnold/berserk) and [Bit-Genie](https://github.com/Aryan1508/Bit-Genie).
