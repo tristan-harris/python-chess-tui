@@ -14,6 +14,7 @@ from model.pieces import Piece
 
 PADDING: int = 2
 
+
 class GameView:
     def __init__(self, board: Board, send_movement: Callable[[Movement]], game_config: GameConfig):
         self.term: Terminal = Terminal()

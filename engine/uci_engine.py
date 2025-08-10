@@ -5,6 +5,7 @@ from pathlib import Path
 class UCIEngineError(Exception):
     pass
 
+
 class UCIEngine:
     def __init__(self, path: str, depth: int):
         self.path: Path = Path(path)

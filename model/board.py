@@ -5,6 +5,7 @@ from typing import Type
 from .movement import Movement
 from .pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King
 
+
 class Board:
     width = 8
     height = 8
@@ -50,7 +51,6 @@ class Board:
         self._pieces[(5, 0)] = Bishop(False)
         self._pieces[(6, 0)] = Knight(False)
         self._pieces[(7, 0)] = Rook(False)
-
 
     def get_moveable_squares(self, square: tuple[int, int]) -> set[tuple[int, int]]:
         if square not in self._pieces:
