@@ -18,13 +18,14 @@ class Piece:
     def __str__(self) -> str:
         return f"{self.name} (white={self.is_white}, moved={self.has_moved})"
 
+    @property
+    def character(self) -> str:
+        return self._character.upper() if self.is_white else self._character
+
     def get_moveable_squares(
         self, _pieces: dict[tuple[int, int], Piece], _square: tuple[int, int]
     ) -> set[tuple[int, int]]:
         raise NotImplementedError("Cannot get moveable squares from abstract Piece class.")
-
-    def get_ascii_character(self) -> str:
-        return self._character.upper() if self.is_white else self._character
 
     def _get_moveable_squares_by_directions(
         self,

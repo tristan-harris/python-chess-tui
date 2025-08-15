@@ -124,7 +124,7 @@ class GameView:
                         foreground_color = self.colors["black_piece_foreground"]
 
                     if self.game_config.ascii:
-                        piece_character = piece.get_ascii_character()
+                        piece_character = piece.character
                     else:
                         piece_character = piece.nerdfont_character
 

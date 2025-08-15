@@ -269,7 +269,7 @@ class Board:
                     if empty_counter != 0:
                         row_string += str(empty_counter)
                         empty_counter = 0
-                    row_string += self._pieces[(column, row)].get_ascii_character()
+                    row_string += self._pieces[(column, row)].character
                 else:
                     empty_counter += 1
 
