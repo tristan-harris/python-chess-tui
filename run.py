@@ -1,23 +1,55 @@
+import argparse
 import sys
-
-import click
 
 from controller.game_config import GameConfig
 from controller.game_controller import GameController
 
 
-@click.command()
-@click.option("-w", "--white", help="Path of chess engine to play white", type=str)
-@click.option("-b", "--black", help="Path of chess engine to play black", type=str)
-@click.option("-d", "--depth", default=25, help="Engine search depth, default 25", type=int)
-@click.option("-a", "--ascii", default=False, is_flag=True, help="Use ASCII characters for pieces instead of NerdFont")
-def main(white: str | None, black: str | None, depth: int, ascii: bool):
-    """A simple Chess TUI.
+def main():
+    desc: str = (
+        "A simple Chess TUI.\n\n"
+        "Use arrow keys to move cursor, press 'Space' to confirm, 'Esc' to cancel and 'q' to quit.\n\n"
+        "Engines used must be UCI compliant. If engine(s) are not specified, player input will be used."
+    )
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description=desc, formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        "-w",
+        "--white",
+        dest="white_engine_path",
+        type=str,
+        help="Path of chess engine to play white",
+        metavar="PATH",
+    )
+    parser.add_argument(
+        "-b",
+        "--black",
+        dest="black_engine_path",
+        type=str,
+        help="Path of chess engine to play black",
+        metavar="PATH",
+    )
+    parser.add_argument(
+        "-d",
+        "--depth",
+        dest="engine_depth",
+        default=25,
+        type=int,
+        help="Engine search depth, default 25",
+        metavar="INTEGER",
+    )
+    parser.add_argument(
+        "-a",
+        "--ascii",
+        dest="ascii",
+        default=False,
+        action="store_true",
+        help="Use ASCII characters for pieces instead of NerdFont",
+    )
+    args: argparse.Namespace = parser.parse_args()
 
-    Use arrow keys to move cursor, press 'Space' to confirm, 'Esc' to cancel and 'q' to quit.
-
-    Engines used must be UCI compliant. If engines are not specified, player input will be used."""
-    config: GameConfig = GameConfig(white, black, depth, ascii)
+    config: GameConfig = GameConfig(**vars(args))  # pyright: ignore[reportAny]
     controller: GameController = GameController(config)
 
     try:
