@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Type
+from typing import override
 
 from .pieces import Piece, Queen, Rook, Bishop, Knight
 
@@ -9,14 +9,15 @@ class Movement:
         self,
         origin_square: tuple[int, int],
         target_square: tuple[int, int],
-        pawn_promotion: Type[Piece] = Queen,
+        pawn_promotion: type[Piece] = Queen,
     ):
         self.origin_square: tuple[int, int] = origin_square
         self.target_square: tuple[int, int] = target_square
-        self.pawn_promotion: Type[Piece] = pawn_promotion
+        self.pawn_promotion: type[Piece] = pawn_promotion
 
+    @override
     def __str__(self):
-        return f"Movement origin={self.origin_square}, target={self.target_square}, promotion={self.pawn_promotion._character}"
+        return f"Movement origin={self.origin_square}, target={self.target_square}"
 
     @classmethod
     def create_from_algebraic(cls, notation: str) -> Movement:
@@ -25,17 +26,16 @@ class Movement:
 
         # if pawn promotion specified
         if len(notation) == 5:
+            promotion: type[Piece] = Queen
             match notation[4]:
-                case "q":
-                    promotion: Type[Piece] = Queen
                 case "r":
-                    promotion: Type[Piece] = Rook
+                    promotion = Rook
                 case "b":
-                    promotion: Type[Piece] = Bishop
+                    promotion = Bishop
                 case "n":
-                    promotion: Type[Piece] = Knight
+                    promotion = Knight
                 case _:
-                    promotion: Type[Piece] = Queen
+                    raise Exception(f"Unknown promotion character '{notation[4]}'")
 
             return cls(origin_square, target_square, promotion)
 

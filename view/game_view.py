@@ -1,6 +1,7 @@
-from __future__ import annotations  # lazy loads type annotations
+from __future__ import annotations
 import asyncio
-from typing import Callable
+from collections.abc import Awaitable, Callable
+from typing import override
 
 from blessed import Terminal
 from blessed.keyboard import Keystroke
@@ -16,7 +17,12 @@ PADDING: int = 2
 
 
 class GameView:
-    def __init__(self, board: Board, send_movement: Callable[[Movement]], game_config: GameConfig):
+    def __init__(
+        self,
+        board: Board,
+        send_movement: Callable[[Movement], Awaitable[None]],
+        game_config: GameConfig,
+    ):
         self.term: Terminal = Terminal()
         self.game_config: GameConfig = game_config
 
@@ -37,7 +43,7 @@ class GameView:
         self.movement_cursor: Cursor = Cursor(0, 0, board.width - 1, board.height - 1)
 
         self.board: Board = board
-        self.send_movement: Callable[[Movement]] = send_movement
+        self.send_movement: Callable[[Movement], Awaitable[None]] = send_movement
 
         self.is_ready: bool = False
         self.state: GameViewState = NoInputState(self)
@@ -51,6 +57,9 @@ class GameView:
 
     async def disable_input(self):
         await self._change_state(NoInputState(self))
+
+    async def exit_selection(self):
+        await self._change_state(SelectingState(self))
 
     async def run(self):
         try:
@@ -73,7 +82,9 @@ class GameView:
             print(self.term.home + self.term.clear)
             raise
 
-    async def draw_board(self, draw_cursors: bool, moveable_squares: set[tuple[int, int]] = set()):
+    async def draw_board(
+        self, draw_cursors: bool, moveable_squares: set[tuple[int, int]] | None = None
+    ):
         print(self.term.home)
 
         pieces: dict[tuple[int, int], Piece] = self.board.get_pieces()
@@ -92,7 +103,7 @@ class GameView:
                             background_color = self.colors["cursor_background"]
                         elif self.selection_cursor.square == (x, y):
                             background_color = self.colors["selected_square_background"]
-                        elif (x, y) in moveable_squares:
+                        elif moveable_squares and (x, y) in moveable_squares:
                             background_color = self.colors["moveable_square_background"]
 
                 if background_color == "":
@@ -129,17 +140,17 @@ class GameView:
 
             # white player status
             if y == 0:
-                text: str = f"White: {self.get_player_name(white=True)}"
+                white_text: str = f"White: {self.get_player_name(white=True)}"
                 if self.board.white_turn:
-                    text = f"{self.term.bold}{text}{self.term.normal}"
-                print(text, end="")
+                    white_text = f"{self.term.bold}{white_text}{self.term.normal}"
+                print(white_text, end="")
 
             # black player status
             elif y == 1:
-                text: str = f"Black: {self.get_player_name(white=False)}"
+                black_text: str = f"Black: {self.get_player_name(white=False)}"
                 if not self.board.white_turn:
-                    text = f"{self.term.bold}{text}{self.term.normal}"
-                print(text, end="")
+                    black_text = f"{self.term.bold}{black_text}{self.term.normal}"
+                print(black_text, end="")
 
             print()  # move down to next row
 
@@ -202,12 +213,12 @@ class GameView:
 
 class GameViewState:
     def __init__(self, view: GameView):
-        self.view = view
+        self.view: GameView = view
 
     async def enter(self):
         pass
 
-    async def handle_input(self, user_input: Keystroke):
+    async def handle_input(self, _user_input: Keystroke):
         pass
 
     async def draw_board(self):
@@ -218,9 +229,11 @@ class GameViewState:
 
 
 class SelectingState(GameViewState):
+    @override
     async def enter(self):
         await self.draw_board()
 
+    @override
     async def handle_input(self, user_input: Keystroke):
         redraw: bool = True
         state_cursor: Cursor = self.view.selection_cursor
@@ -256,6 +269,7 @@ class SelectingState(GameViewState):
         if redraw:
             await self.draw_board()
 
+    @override
     async def draw_board(self):
         await self.view.draw_board(draw_cursors=True)
 
@@ -265,10 +279,12 @@ class MovingState(GameViewState):
         super().__init__(view)
         self.moveable_squares: set[tuple[int, int]] = moveable_squares
 
+    @override
     async def enter(self):
         self.view.movement_cursor.square = self.view.selection_cursor.square
         await self.draw_board()
 
+    @override
     async def handle_input(self, user_input: Keystroke):
         redraw: bool = True
         state_cursor: Cursor = self.view.movement_cursor
@@ -276,7 +292,7 @@ class MovingState(GameViewState):
         if user_input.is_sequence:
             match user_input.name:
                 case "KEY_ESCAPE":
-                    await self.view._change_state(SelectingState(self.view))
+                    await self.view.exit_selection()
                     redraw = False
                 case "KEY_LEFT":
                     state_cursor.move(-1, 0)
@@ -312,13 +328,16 @@ class MovingState(GameViewState):
         if redraw:
             await self.draw_board()
 
+    @override
     async def draw_board(self):
         await self.view.draw_board(draw_cursors=True, moveable_squares=self.moveable_squares)
 
 
 class NoInputState(GameViewState):
+    @override
     async def enter(self):
         await self.draw_board()
 
+    @override
     async def draw_board(self):
         await self.view.draw_board(draw_cursors=False)

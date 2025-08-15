@@ -1,14 +1,13 @@
 from __future__ import annotations  # lazy loads type annotations
 import copy
-from typing import Type
 
 from .movement import Movement
 from .pieces import Piece, Pawn, Knight, Bishop, Rook, Queen, King
 
 
 class Board:
-    width = 8
-    height = 8
+    width: int = 8
+    height: int = 8
 
     def __init__(self):
         self._pieces: dict[tuple[int, int], Piece] = {}
@@ -20,8 +19,8 @@ class Board:
         # set again or reset at the end of next turn
         self.pawn_double_move: tuple[int, int] | None = None
 
-        self.halfmove_clock = 0
-        self.fullmove_number = 1
+        self.halfmove_clock: int = 0
+        self.fullmove_number: int = 1
 
     def setup_pieces(self):
         """Setups chess board with standard configuration"""
@@ -199,7 +198,7 @@ class Board:
         return new_board
 
     def pawn_movement(
-        self, pawn_square: tuple[int, int], target_square: tuple[int, int], promotion: Type[Piece]
+        self, pawn_square: tuple[int, int], target_square: tuple[int, int], promotion: type[Piece]
     ):
         pawn: Piece = self._pieces[pawn_square]
 
@@ -221,7 +220,7 @@ class Board:
                 direction = 1 if pawn.is_white else -1
                 del self._pieces[(target_square[0], target_square[1] + direction)]
 
-    def promote_pawn(self, square: tuple[int, int], is_white: bool, new_piece: Type[Piece] = Queen):
+    def promote_pawn(self, square: tuple[int, int], is_white: bool, new_piece: type[Piece] = Queen):
         self._pieces[square] = new_piece(is_white)
         self._pieces[square].has_moved = True
 
@@ -321,7 +320,7 @@ class Board:
         return castling_rights
 
     def _is_castling_piece_valid(
-        self, square: tuple[int, int], piece_class: Type[Piece], is_white: bool
+        self, square: tuple[int, int], piece_class: type[Piece], is_white: bool
     ):
         if square in self._pieces:
             piece: Piece = self._pieces[square]

@@ -10,7 +10,7 @@ from view.game_view import GameView
 
 class GameController:
     def __init__(self, config: GameConfig):
-        self.config = config
+        self.config: GameConfig = config
 
         self.white_engine: UCIEngine | None = None
         if self.config.white_engine_path:

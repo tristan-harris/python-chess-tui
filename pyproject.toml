@@ -1,2 +1,5 @@
 [tool.ruff]
 line-length = 100
+
+[tool.basedpyright]
+reportUnusedCallResult = false

@@ -1,23 +1,25 @@
-from __future__ import annotations  # lazy loads type annotations
+from __future__ import annotations
+from typing import override
 
 
 class Piece:
-    name = "Piece"
-    nerdfont_character = " "
-    _character = " "
+    name: str = "Piece"
+    nerdfont_character: str = " "
+    _character: str = " "
 
-    board_width = 8
-    board_height = 8
+    board_width: int = 8
+    board_height: int = 8
 
     def __init__(self, is_white: bool):
-        self.is_white = is_white
-        self.has_moved = False
+        self.is_white: bool = is_white
+        self.has_moved: bool = False
 
+    @override
     def __str__(self) -> str:
         return f"{self.name} (white={self.is_white}, moved={self.has_moved})"
 
     def get_moveable_squares(
-        self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
+        self, _pieces: dict[tuple[int, int], Piece], _square: tuple[int, int]
     ) -> set[tuple[int, int]]:
         raise NotImplementedError("Cannot get moveable squares from abstract Piece class.")
 
@@ -70,10 +72,11 @@ class Piece:
 
 
 class Pawn(Piece):
-    name = "Pawn"
-    nerdfont_character = "󰡙"
-    _character = "p"
+    name: str = "Pawn"
+    nerdfont_character: str = "󰡙"
+    _character: str = "p"
 
+    @override
     def get_moveable_squares(
         self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
     ) -> set[tuple[int, int]]:
@@ -103,10 +106,11 @@ class Pawn(Piece):
 
 
 class Knight(Piece):
-    name = "Knight"
-    nerdfont_character = "󰡘"
-    _character = "n"
+    name: str = "Knight"
+    nerdfont_character: str = "󰡘"
+    _character: str = "n"
 
+    @override
     def get_moveable_squares(
         self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
     ) -> set[tuple[int, int]]:
@@ -120,38 +124,41 @@ class Knight(Piece):
             (-2, -1),
             (-2, 1),
         ]
-        return self._get_moveable_squares_by_directions(pieces, square, directions, False)
+        return self._get_moveable_squares_by_directions(pieces, square, directions, repeat=False)
 
 
 class Bishop(Piece):
-    name = "Bishop"
-    nerdfont_character = "󰡜"
-    _character = "b"
+    name: str = "Bishop"
+    nerdfont_character: str = "󰡜"
+    _character: str = "b"
 
+    @override
     def get_moveable_squares(
         self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
     ) -> set[tuple[int, int]]:
         directions: list[tuple[int, int]] = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
-        return self._get_moveable_squares_by_directions(pieces, square, directions, True)
+        return self._get_moveable_squares_by_directions(pieces, square, directions, repeat=True)
 
 
 class Rook(Piece):
-    name = "Rook"
-    nerdfont_character = "󰡛"
-    _character = "r"
+    name: str = "Rook"
+    nerdfont_character: str = "󰡛"
+    _character: str = "r"
 
+    @override
     def get_moveable_squares(
         self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
     ) -> set[tuple[int, int]]:
         directions: list[tuple[int, int]] = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        return self._get_moveable_squares_by_directions(pieces, square, directions, True)
+        return self._get_moveable_squares_by_directions(pieces, square, directions, repeat=True)
 
 
 class Queen(Piece):
-    name = "Queen"
-    nerdfont_character = "󰡚"
-    _character = "q"
+    name: str = "Queen"
+    nerdfont_character: str = "󰡚"
+    _character: str = "q"
 
+    @override
     def get_moveable_squares(
         self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
     ) -> set[tuple[int, int]]:
@@ -165,14 +172,15 @@ class Queen(Piece):
             (1, -1),
             (1, 1),
         ]
-        return self._get_moveable_squares_by_directions(pieces, square, directions, True)
+        return self._get_moveable_squares_by_directions(pieces, square, directions, repeat=True)
 
 
 class King(Piece):
-    name = "King"
-    nerdfont_character = "󰡗"
-    _character = "k"
+    name: str = "King"
+    nerdfont_character: str = "󰡗"
+    _character: str = "k"
 
+    @override
     def get_moveable_squares(
         self, pieces: dict[tuple[int, int], Piece], square: tuple[int, int]
     ) -> set[tuple[int, int]]:
@@ -186,4 +194,4 @@ class King(Piece):
             (1, 0),
             (1, 1),
         ]
-        return self._get_moveable_squares_by_directions(pieces, square, directions, False)
+        return self._get_moveable_squares_by_directions(pieces, square, directions, repeat=False)
