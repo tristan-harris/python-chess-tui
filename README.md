@@ -6,7 +6,7 @@
 
 A Python program that lets you play chess in the terminal, with support for UCI-compliant chess engines.
 
-Requires [Blessed](https://github.com/jquast/blessed) for the TUI (since curses is archaic), and [Click](https://github.com/pallets/click) for the command-line interface.
+Requires [Blessed](https://github.com/jquast/blessed) for the TUI and [Click](https://github.com/pallets/click) for the command-line interface.
 
 ---
 
@@ -16,11 +16,11 @@ Usage: run.py [OPTIONS]
 
   A simple Chess TUI.
 
-  Use arrow keys to move cursor, press 'Space' to confirm,
-  'Esc' to cancel and 'q' to quit.
+  Use arrow keys to move cursor, press 'Space' to confirm, 'Esc' to cancel and
+  'q' to quit.
 
-  Engines used must be UCI compliant. If engines are not
-  specified, player input will be used.
+  Engines used must be UCI compliant. If engines are not specified,
+  player input will be used.
 
 Options:
   -w, --white TEXT     Path of chess engine to play white
