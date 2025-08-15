@@ -49,10 +49,9 @@ def main():
     )
     args: argparse.Namespace = parser.parse_args()
 
-    config: GameConfig = GameConfig(**vars(args))  # pyright: ignore[reportAny]
-    controller: GameController = GameController(config)
-
     try:
+        config: GameConfig = GameConfig(**vars(args))  # pyright: ignore[reportAny]
+        controller: GameController = GameController(config)
         controller.start()
     except Exception as error:
         print(f"ERROR: {error}")

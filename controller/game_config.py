@@ -10,3 +10,6 @@ class GameConfig:
         self.black_engine_path: str | None = black_engine_path
         self.engine_depth: int = engine_depth
         self.ascii: bool = ascii
+
+        if self.engine_depth <= 0:
+            raise ValueError(f"Invalid engine depth of '{self.engine_depth}'")
